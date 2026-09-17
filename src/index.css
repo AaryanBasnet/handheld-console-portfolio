@@ -1,0 +1,363 @@
+@import "tailwindcss";
+
+/* Self-hosted fonts (Fontsource) */
+@import "@fontsource/bagel-fat-one/latin-400.css";
+@import "@fontsource/pixelify-sans/latin-400.css";
+@import "@fontsource/pixelify-sans/latin-700.css";
+@import "@fontsource/silkscreen/latin-400.css";
+@import "@fontsource/silkscreen/latin-700.css";
+@import "@fontsource/ibm-plex-sans/latin-400.css";
+@import "@fontsource/ibm-plex-sans/latin-600.css";
+@import "@fontsource/ibm-plex-mono/latin-400.css";
+@import "@fontsource/ibm-plex-mono/latin-500.css";
+
+@theme {
+  --color-butter: #ffe45e;
+  --color-cobalt: #2d3bff;
+  --color-tomato: #ff4a2b;
+  --color-pink: #ff9ecf;
+  --color-ink: #111111;
+  --color-paper: #fffdf5;
+  --color-leaf: #34c77b;
+
+  --font-display: "Bagel Fat One", "Arial Black", sans-serif;
+  --font-pixel: "Pixelify Sans", "Nirmala UI", "Noto Sans Devanagari", "Devanagari Sangam MN", monospace;
+  --font-tiny: "Silkscreen", monospace;
+  --font-sans: "IBM Plex Sans", system-ui, sans-serif;
+  --font-mono: "IBM Plex Mono", ui-monospace, monospace;
+
+  --shadow-hard: 6px 6px 0 0 #111111;
+  --shadow-hard-sm: 3px 3px 0 0 #111111;
+  --shadow-hard-lg: 10px 10px 0 0 #111111;
+}
+
+:root {
+  /* shell colour, overridden from state */
+  --shell: #ffe45e;
+  --shell-dark: color-mix(in oklab, var(--shell) 78%, #111111);
+  --shell-light: color-mix(in oklab, var(--shell) 85%, #ffffff);
+  /* contrast colour for text printed straight on --shell; set per swatch in JS */
+  --shell-ink: #111111;
+
+  /* LCD palette, overridden per cartridge / contrast wheel */
+  --lcd-bg: #d9e8a8;
+  --lcd-fg: #1a2c14;
+  --lcd-mid: #7ea35b;
+  --lcd-accent: #3a5a2a;
+}
+
+html, body, #root { height: 100%; }
+body {
+  margin: 0;
+  background: var(--color-paper);
+  color: var(--color-ink);
+  font-family: var(--font-sans);
+  -webkit-font-smoothing: antialiased;
+  overscroll-behavior: none;
+}
+
+/* Desk surface: a dot grid */
+.desk {
+  background-color: var(--color-paper);
+  background-image: radial-gradient(#11111122 1.2px, transparent 1.3px);
+  background-size: 18px 18px;
+}
+
+/* ---------- Screen (LCD) ---------- */
+.lcd {
+  container-type: inline-size;
+  background: var(--lcd-bg);
+  color: var(--lcd-fg);
+  font-family: var(--font-pixel);
+  position: relative;
+  overflow: hidden;
+  isolation: isolate;
+}
+.lcd-text { text-shadow: 0.08em 0.08em 0 color-mix(in srgb, var(--lcd-fg) 22%, transparent); }
+.lcd ::selection { background: var(--lcd-fg); color: var(--lcd-bg); }
+
+/* Type scale in container units so the screen scales with the device */
+.t-xs { font-size: 3.6cqw; line-height: 1.25; }
+.t-sm { font-size: 4.4cqw; line-height: 1.25; }
+.t-md { font-size: 5.4cqw; line-height: 1.25; }
+.t-lg { font-size: 7cqw; line-height: 1.1; }
+.t-xl { font-size: 10cqw; line-height: 1; }
+.p-screen { padding: 4cqw; }
+
+/* Scanlines + subtle vignette, purely decorative */
+.lcd-fx::before {
+  content: "";
+  position: absolute; inset: 0; z-index: 5; pointer-events: none;
+  background:
+    repeating-linear-gradient(0deg, transparent 0 2px, color-mix(in srgb, var(--lcd-fg) 9%, transparent) 2px 3px),
+    radial-gradient(ellipse at center, transparent 60%, color-mix(in srgb, var(--lcd-fg) 14%, transparent) 100%);
+  mix-blend-mode: multiply;
+}
+.lcd-fx::after {
+  /* glass reflection */
+  content: "";
+  position: absolute; inset: 0; z-index: 6; pointer-events: none;
+  background: linear-gradient(115deg, rgba(255,255,255,0.18) 0%, rgba(255,255,255,0) 35%);
+}
+
+/* Split-flap board character: a physical flap card rotating into place */
+@keyframes flap-in {
+  0%   { transform: rotateX(-90deg); opacity: 0; }
+  55%  { transform: rotateX(25deg); opacity: 1; }
+  100% { transform: rotateX(0deg); }
+}
+.flap-char {
+  display: inline-block;
+  position: relative;
+  min-width: 0.68em;
+  text-align: center;
+  background: color-mix(in srgb, var(--lcd-bg) 84%, #000);
+  border-radius: 1px;
+  transform-origin: 50% 20%;
+  animation: flap-in 200ms ease-out both;
+}
+.flap-char::after {
+  content: '';
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 48%;
+  height: 1px;
+  background: rgba(0, 0, 0, 0.45);
+}
+
+/* Ghost trail on screen change */
+@keyframes lcd-ghost {
+  0%   { opacity: 0.55; filter: blur(0.6px); transform: translateX(-1px); }
+  100% { opacity: 1; filter: blur(0); transform: translateX(0); }
+}
+.lcd-swap { animation: lcd-ghost 180ms steps(3) both; }
+
+/* Power-on flicker */
+@keyframes lcd-power {
+  0% { opacity: 0; transform: scaleY(0.02); }
+  35% { opacity: 1; transform: scaleY(0.02); }
+  55% { transform: scaleY(1); opacity: 0.5; }
+  70% { opacity: 1; }
+  80% { opacity: 0.6; }
+  100% { opacity: 1; }
+}
+.lcd-power-on { animation: lcd-power 520ms steps(6) both; transform-origin: center; }
+
+.lcd-off {
+  background: #2a2e26;
+  color: transparent;
+}
+
+/* Blinking cursor */
+@keyframes blink { 50% { opacity: 0; } }
+.blink { animation: blink 900ms steps(1) infinite; }
+
+/* ---------- Device body ---------- */
+.device-3d { transform-style: preserve-3d; }
+.device-face { backface-visibility: hidden; -webkit-backface-visibility: hidden; }
+
+.plastic {
+  background: var(--shell);
+  border: 3px solid var(--color-ink);
+  box-shadow:
+    inset -4px -6px 0 0 color-mix(in oklab, var(--shell) 72%, #111111),
+    inset 4px 4px 0 0 color-mix(in oklab, var(--shell) 80%, #ffffff),
+    var(--shadow-hard-lg);
+}
+
+/* Physical buttons */
+.btn-hw {
+  border: 3px solid var(--color-ink);
+  box-shadow: 0 5px 0 0 var(--color-ink);
+  transform: translateY(0);
+  transition: transform 60ms linear, box-shadow 60ms linear;
+  touch-action: none;
+  user-select: none;
+  -webkit-user-select: none;
+  -webkit-tap-highlight-color: transparent;
+}
+.btn-hw:active, .btn-hw[data-pressed="true"] {
+  transform: translateY(4px);
+  box-shadow: 0 1px 0 0 var(--color-ink);
+}
+.pill { box-shadow: 0 4px 0 0 var(--color-ink); transition: transform 60ms linear, box-shadow 60ms linear; }
+.btn-hw:active .pill, .btn-hw[data-pressed="true"] .pill {
+  transform: rotate(-22deg) translateY(3px);
+  box-shadow: 0 1px 0 0 var(--color-ink);
+}
+.btn-hw:focus-visible, .focus-ring:focus-visible {
+  outline: 3px solid var(--color-cobalt);
+  outline-offset: 3px;
+}
+
+/* First-ever visit: nudge toward the power switch instead of a dead screen */
+@keyframes power-hint {
+  0%, 100% { box-shadow: 0 0 0 0 color-mix(in srgb, var(--color-cobalt) 55%, transparent); }
+  50%      { box-shadow: 0 0 0 6px color-mix(in srgb, var(--color-cobalt) 0%, transparent); }
+}
+.power-hint { animation: power-hint 1.6s ease-in-out infinite; }
+
+/* Text printed directly on the shell plastic: readable on every shell colour */
+.on-shell { color: var(--shell-ink); }
+
+/* Moulded caption tags (CON, VOL, LINK): these sit off the shell, over the
+   desk dots, so they get their own paper plate instead of relying on --shell-ink */
+.shell-tag {
+  display: inline-block;
+  padding: 2px 3px 1px;
+  border: 2px solid var(--color-ink);
+  border-radius: 2px;
+  background: var(--color-paper);
+  color: var(--color-ink);
+  font-family: var(--font-tiny);
+  font-size: 8px;
+  line-height: 1;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+/* Wheels */
+.wheel {
+  background: repeating-linear-gradient(90deg, #333 0 3px, #555 3px 6px);
+  border: 3px solid var(--color-ink);
+}
+
+/* ---------- Cartridge ---------- */
+.cart-shell {
+  border: 3px solid var(--color-ink);
+  box-shadow: var(--shadow-hard);
+  border-radius: 6px 6px 3px 3px;
+  position: relative;
+}
+.cart-shell::after {
+  /* grip ridges */
+  content: "";
+  position: absolute; left: 6%; right: 6%; bottom: 4%; height: 12%;
+  background: repeating-linear-gradient(90deg, transparent 0 6px, rgba(17,17,17,0.35) 6px 9px);
+  pointer-events: none;
+}
+.cart-label {
+  border: 2px solid var(--color-ink);
+  font-family: var(--font-tiny);
+}
+
+@keyframes cart-seat {
+  0%   { transform: translate(-50%, -175%) rotate(-5deg); }
+  60%  { transform: translate(-50%, -52%) rotate(0deg); }
+  78%  { transform: translate(-50%, -44%); }
+  90%  { transform: translate(-50%, -48%); }
+  100% { transform: translate(-50%, -46%); }
+}
+.cart-seating { animation: cart-seat 440ms cubic-bezier(.4,0,.2,1) both; }
+.cart-seated  { transform: translate(-50%, -46%); }
+
+@keyframes tab-seat {
+  0%   { transform: translateY(-120%); }
+  70%  { transform: translateY(8%); }
+  100% { transform: translateY(0); }
+}
+.tab-seating { animation: tab-seat 440ms cubic-bezier(.4,0,.2,1) both; }
+
+@keyframes toast-in {
+  from { transform: translateY(8px); opacity: 0; }
+  to   { transform: none; opacity: 1; }
+}
+@keyframes cable-in {
+  to { stroke-dashoffset: 0; }
+}
+@keyframes boot-bar { from { width: 0 } to { width: 100% } }
+@keyframes cs-shake { 0%{transform:translateX(0)} 25%{transform:translateX(-3px)} 50%{transform:translateX(3px)} 75%{transform:translateX(-2px)} 100%{transform:translateX(0)} }
+@keyframes sv-stamp { from { transform: scale(1.6) rotate(-8deg); opacity: 0 } to { transform: none; opacity: 1 } }
+
+@keyframes device-jolt {
+  0% { transform: translateY(0); }
+  50% { transform: translateY(3px); }
+  100% { transform: translateY(0); }
+}
+.jolt { animation: device-jolt 140ms ease-out both; }
+
+/* ---------- Manual booklet ---------- */
+.booklet {
+  background: var(--color-paper);
+  border: 3px solid var(--color-ink);
+  box-shadow: var(--shadow-hard-lg);
+  background-image: linear-gradient(90deg, transparent 0 24px, #11111114 24px 26px, transparent 26px);
+}
+@keyframes booklet-in {
+  from { transform: translateX(-24px) rotate(-1deg); opacity: 0; }
+  to   { transform: none; opacity: 1; }
+}
+.booklet-in { animation: booklet-in 220ms cubic-bezier(.2,.8,.2,1) both; }
+/* On narrower desktops the booklet floats over the desk instead of beside the device */
+@media (max-width: 1180px) {
+  .booklet-desk {
+    position: fixed;
+    top: 16px;
+    bottom: 16px;
+    left: 16px;
+    right: auto;
+    margin: 0;
+    height: auto;
+    width: min(420px, calc(100vw - 32px));
+    z-index: 50;
+  }
+}
+
+/* ---------- Misc ---------- */
+.sr-only-live { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+
+.no-scrollbar::-webkit-scrollbar { display: none; }
+.no-scrollbar { scrollbar-width: none; }
+
+.pixelated { image-rendering: pixelated; }
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+  }
+  .lcd-fx::before { display: none; }
+}
+
+/* ---------- Desk ---------- */
+/* Window light from the top-left over the dot grid */
+.desk-lit {
+  background-image:
+    linear-gradient(125deg, rgba(255,255,255,0.7) 0%, rgba(255,255,255,0) 42%, rgba(17,17,17,0.05) 100%),
+    radial-gradient(#11111122 1.2px, transparent 1.3px);
+  background-size: 100% 100%, 18px 18px;
+}
+
+/* Rubber desk mat under the device and the shelf */
+.desk-mat {
+  background-color: color-mix(in oklab, var(--color-paper) 90%, #111111);
+  background-image: radial-gradient(rgba(17,17,17,0.12) 0.8px, transparent 0.9px);
+  background-size: 6px 6px;
+  border: 3px solid var(--color-ink);
+  border-radius: 30px;
+  box-shadow:
+    inset 0 0 0 7px color-mix(in oklab, var(--color-paper) 82%, #111111),
+    0 22px 34px -16px rgba(17,17,17,0.4);
+}
+
+/* Soft contact shadow under a thing that sits on the mat */
+.desk-shadow {
+  position: absolute;
+  left: 4%;
+  right: 4%;
+  bottom: -10px;
+  height: 26px;
+  z-index: -1;
+  background: radial-gradient(ellipse at center, rgba(17,17,17,0.38), transparent 70%);
+  filter: blur(6px);
+  pointer-events: none;
+}
+
+@keyframes steam {
+  0%   { transform: translateY(0) scaleX(1); opacity: 0; }
+  30%  { opacity: 0.7; }
+  100% { transform: translateY(-14px) scaleX(1.35); opacity: 0; }
+}
+.steam { animation: steam 2.4s ease-out infinite; }
