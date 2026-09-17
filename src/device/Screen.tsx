@@ -106,7 +106,7 @@ function ScreenRouter() {
 
 /** The LCD. Palette comes from state; effects are pure CSS. */
 export function Screen({ style }: { style?: CSSProperties }) {
-  const { state, palette, reducedMotion } = useDevice()
+  const { state, palette, reducedMotion, powerToggle } = useDevice()
   const off = state.power === 'off'
   const vars = {
     '--lcd-bg': palette.bg,
@@ -122,8 +122,20 @@ export function Screen({ style }: { style?: CSSProperties }) {
       style={vars}
       role="region"
       aria-label="Screen"
-      aria-hidden={off}
     >
+      {off && (
+        // a dark screen is the first thing everyone pokes: let that be the
+        // power switch too, and print the instruction on the glass
+        <button
+          type="button"
+          onClick={powerToggle}
+          aria-label="Power on"
+          className="absolute inset-0 z-[7] flex cursor-pointer flex-col items-center justify-center gap-[2cqw] focus-visible:outline-2 focus-visible:outline-[#8a9a80]"
+        >
+          <span className="t-sm font-tiny uppercase tracking-[0.15em] text-[#7f8c74]">Tap to power on</span>
+          <span className="t-xs font-tiny uppercase tracking-[0.1em] text-[#5f6b57]">↖ or flip the switch</span>
+        </button>
+      )}
       {!off && (
         <div key={`p${state.power}`} className={`absolute inset-0 ${reducedMotion ? '' : 'lcd-power-on'}`}>
           <div key={state.swap} className={`absolute inset-0 ${reducedMotion ? '' : 'lcd-swap'}`}>

@@ -1,4 +1,4 @@
-/** SweetNest configurator options. Example values for a concept, not a spec. */
+/** SweetNest configurator options. Sample values for the cartridge, not the product catalogue. */
 export interface CakeOption {
   id: 'shape' | 'tiers' | 'flavour' | 'icing' | 'topping'
   label: string

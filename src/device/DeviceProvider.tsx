@@ -213,7 +213,7 @@ export function DeviceProvider({ children }: { children: ReactNode }) {
         dispatch({ type: 'CART_SEATED' })
         unlock('insert')
         const title = cartById(id)?.title.toUpperCase() ?? 'CARTRIDGE'
-        toast(stateRef.current.power === 'off' ? `${title} LOADED · FLIP THE SWITCH` : `${title} LOADED · PRESS START`)
+        toast(`${title} LOADED · PRESS START`)
       }, dur)
     },
     [unlock, toast],
@@ -370,7 +370,15 @@ export function DeviceProvider({ children }: { children: ReactNode }) {
       }
 
       if (s.power !== 'on') {
-        if (s.power === 'off') sfx.tick()
+        // any button on a dark console turns it on: it's what everyone tries
+        // first, so it should work. Start also opens the menu once booted.
+        if (s.power === 'off') {
+          dispatch({ type: 'POWER_ON', instant: reducedRef.current })
+          if (b === 'start') dispatch({ type: 'HOME_VIEW', view: 'menu' })
+          sfx.power()
+          vibrate(15)
+          unlock('power')
+        }
         return
       }
 

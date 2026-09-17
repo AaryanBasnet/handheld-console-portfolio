@@ -51,7 +51,7 @@ Each cartridge is a small program that plays with what the real project does. Th
   <tr>
     <td><b>Ripe</b> · Tomato farming game in Godot, in development. Clear rocky plots, plant, water and harvest. Sell at the shop for seeds or a watering can. The real clock drives day, night and rain, and plants keep growing while the cartridge is out.</td>
     <td><b>CrownHour</b> · Watch store on the MERN stack. A display case whose watch face keeps real time. Fill a cart, run the checkout, then follow the order through tracking.</td>
-    <td><b>SweetNest</b> · Cake configurator, concept only. Five options, a cake that redraws as you change them, and an order sheet when you bake.</td>
+    <td><b>SweetNest</b> · Custom cake platform with 3D customization, eSewa payments and loyalty rewards. Five options, a cake that redraws as you change them, and an order sheet when you bake.</td>
   </tr>
 </table>
 

@@ -227,23 +227,37 @@ export const cartridges: Cartridge[] = [
   {
     id: 'sweetnest',
     title: 'SweetNest',
-    tag: 'Cake configurator',
+    tag: 'Custom cakes',
     bin: 'bargain',
-    status: 'Concept',
+    status: 'Released',
     label: { bg: '#ff9ecf', fg: '#111111', accent: '#34c77b' },
     palette: { name: 'Icing', bg: '#ffe3ef', fg: '#5a1f3a', mid: '#ff9ecf', accent: '#34c77b' },
     jingle: [72, 76],
-    stack: ['Concept'],
-    summary: '3D cake customization configurator. Concept only.',
+    stack: ['React', 'Three.js', 'Zustand', 'Express', 'MongoDB'],
+    summary: 'Custom cake platform. Interactive 3D cake customization, eSewa payments, loyalty rewards, order tracking.',
     controls: 'UP/DOWN: option · LEFT/RIGHT: change · A: bake',
     manual: [
       {
         heading: 'What it is',
-        body: ['A concept for a 3D cake customization tool: pick a shape, tiers, flavours and decoration, and see the cake update in 3D.'],
+        body: [
+          'A custom cake ordering platform. Ordering a custom cake needs to feel visual and flexible, and the business needs secure payments, order tracking and customer retention. SweetNest covers both.',
+          'Customers build their cake in an interactive 3D customizer on the front end. Behind it sit eSewa payments, loyalty rewards and a secure Node.js and MongoDB backend.',
+        ],
       },
-      { heading: 'Status', body: ['Concept only. Nothing has been built.'] },
+      {
+        heading: 'Features',
+        bullets: ['Interactive 3D cake customization', 'eSewa payment integration', 'Loyalty rewards', 'Order tracking', 'Secure Node.js / MongoDB backend'],
+      },
+      {
+        heading: 'Role',
+        bullets: ['Full-stack development', '3D customization', 'Payment integration'],
+      },
+      { heading: 'Year', body: ['2025'] },
     ],
-    links: [],
+    links: [
+      { label: 'Frontend repository', href: 'https://github.com/AaryanBasnet/SweetNestFrontend' },
+      { label: 'Backend repository', href: 'https://github.com/AaryanBasnet/SweetNestBackend' },
+    ],
   },
   {
     id: 'devkit',

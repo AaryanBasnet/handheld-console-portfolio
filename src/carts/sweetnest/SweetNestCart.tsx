@@ -104,7 +104,7 @@ export default function SweetNestCart({ cart }: CartProps) {
 
   useAnnounce(
     done
-      ? `Order sheet: ${cakeOptions.map((o) => `${o.label} ${c[o.id]}`).join(', ')}. Concept only.`
+      ? `Order sheet: ${cakeOptions.map((o) => `${o.label} ${c[o.id]}`).join(', ')}.`
       : `${cakeOptions[row].label}: ${c[cakeOptions[row].id]}. Left and right to change, A to bake.`,
   )
 
@@ -147,7 +147,7 @@ export default function SweetNestCart({ cart }: CartProps) {
 
   if (done) {
     return (
-      <ScreenFrame title="Order sheet" right="Concept" hint="A: build again">
+      <ScreenFrame title="Order sheet" right="✓" hint="A: build again">
         <div className="mx-auto h-[30cqw] w-[45cqw]">
           <Cake c={c} />
         </div>
@@ -159,13 +159,13 @@ export default function SweetNestCart({ cart }: CartProps) {
             </div>
           ))}
         </dl>
-        <p className="t-xs mt-[2cqw] opacity-70">Concept only. Nothing gets baked.</p>
+        <p className="t-xs mt-[2cqw] uppercase opacity-70">Pixel stand-in for the real 3D customizer.</p>
       </ScreenFrame>
     )
   }
 
   return (
-    <ScreenFrame title="SweetNest" right="Concept" hint={cart.controls} scroll={false}>
+    <ScreenFrame title="SweetNest" right="Custom cakes" hint={cart.controls} scroll={false}>
       <div className="flex h-full flex-col">
         <div className="mx-auto h-[30cqw] w-[45cqw] shrink-0">
           <Cake c={c} />
