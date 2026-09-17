@@ -113,64 +113,11 @@ function Brand({ size = 22 }: { size?: number }) {
   )
 }
 
-export function Front({ handheld }: { handheld: boolean }) {
+export function Front() {
   const { state } = useDevice()
   const slotCart = cartById(state.cart.inserted ?? state.cart.seating ?? undefined)
   const seating = !!state.cart.seating
   const on = state.power !== 'off'
-
-  if (handheld) {
-    return (
-      <div className="relative flex min-h-dvh w-full flex-col px-3 pb-4 pt-2" style={{ background: 'var(--shell)' }}>
-        <div className="flex items-start justify-between gap-2">
-          <PowerSwitch className="pt-1" />
-          <div
-            id="cart-slot"
-            className="relative flex h-[26px] min-w-[150px] items-end justify-center overflow-hidden rounded-b-md border-x-[3px] border-b-[3px] border-ink bg-[#1a1a1a]"
-          >
-            {slotCart && (
-              <div
-                className={`mb-[2px] rounded-t px-3 font-tiny text-[9px] uppercase leading-[16px] ${seating ? 'tab-seating' : ''}`}
-                style={{ background: slotCart.label.bg, color: slotCart.label.fg }}
-                aria-hidden="true"
-              >
-                {slotCart.title}
-              </div>
-            )}
-          </div>
-          <EjectButton />
-        </div>
-
-        <div className="mt-2 flex items-center gap-2">
-          <ContrastWheel />
-          <div className="relative min-w-0 flex-1 rounded-xl border-[3px] border-ink bg-[#151515] px-2 pb-2 pt-5">
-            <div className="absolute left-2 top-[4px] flex items-center gap-1.5">
-              <LED on={on} />
-              <span className="font-tiny text-[7px] uppercase text-paper/70">Power</span>
-            </div>
-            <div className="mx-auto" style={{ width: 'min(100%, calc(44dvh * 10 / 9))' }}>
-              <Screen />
-            </div>
-            <div className="mt-2 flex items-end justify-between px-1">
-              <Brand size={18} />
-              <Toast />
-            </div>
-          </div>
-          <VolumeWheel />
-        </div>
-
-        <div className="flex flex-1 flex-col justify-evenly py-3">
-          <div className="flex items-start justify-between px-1">
-            <DPad size={136} />
-            <ABButtons size={62} />
-          </div>
-          <div className="flex justify-center">
-            <StartSelect width={54} />
-          </div>
-        </div>
-      </div>
-    )
-  }
 
   return (
     <div className="relative" style={{ width: 380 }}>

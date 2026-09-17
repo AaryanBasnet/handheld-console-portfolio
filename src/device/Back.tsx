@@ -52,7 +52,7 @@ function Spec({ rows }: { rows: { k: string; v: string }[] }) {
  * label, which is where the colophon is printed. Sized to the front face, so
  * nothing here scrolls; keep the content short.
  */
-export function Back({ handheld }: { handheld: boolean }) {
+export function Back() {
   const { state, navigateTo, unlock } = useDevice()
   const showing = state.page.kind === 'colophon'
 
@@ -62,18 +62,14 @@ export function Back({ handheld }: { handheld: boolean }) {
 
   return (
     <div
-      className={
-        handheld
-          ? 'relative flex h-full w-full flex-col overflow-hidden px-4 pb-4 pt-3'
-          : 'plastic relative flex h-full flex-col overflow-hidden rounded-[26px] rounded-bl-[72px] px-6 pb-6 pt-5'
-      }
-      style={handheld ? { background: 'var(--shell)' } : { width: 380 }}
+      className="plastic relative flex h-full flex-col overflow-hidden rounded-[26px] rounded-bl-[72px] px-6 pb-6 pt-5"
+      style={{ width: 380 }}
       aria-hidden={!showing}
       inert={!showing}
     >
       <Screw className="left-2.5 top-2.5" />
       <Screw className="right-2.5 top-2.5" />
-      <Screw className={handheld ? 'bottom-2.5 left-2.5' : 'bottom-7 left-7'} />
+      <Screw className="bottom-7 left-7" />
       <Screw className="bottom-2.5 right-2.5" />
 
       <div className="mt-3 flex items-baseline justify-between px-3">
