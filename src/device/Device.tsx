@@ -1,11 +1,11 @@
 import { lazy, Suspense, useEffect, useRef, useState } from 'react'
-import { Link } from 'react-router'
 import { useDevice } from './DeviceProvider'
 import { useHandheldLayout } from '../hooks/useMediaQuery'
 import { Front } from './Front'
 import { Back } from './Back'
 import { Shelf } from './Shelf'
 import { Manual } from './Manual'
+import { ReturnTicket } from './ReturnTicket'
 import { GameCases, Mug, Pencil, QuickStartCard, StickyNote } from './DeskProps'
 
 /** Loaded only when the 3D toggle is switched on. */
@@ -15,9 +15,15 @@ const View3D = lazy(() => import('./View3D'))
  * Scale the desk down so the whole mat fits the window height. Uses CSS zoom,
  * not a transform, so hit-testing, the 3D view and the booklet keep working.
  * Only ever shrinks, and never below MIN_ZOOM so the screen stays readable.
+ *
+ * Nothing on the desk should change the mat's height while you use it: every
+ * change re-runs this and rescales the whole page, which reads as a shake.
+ * So there is 16px of slack (a few px of growth can't summon a scrollbar) and
+ * sub-1% wobble is ignored.
  */
 const MIN_ZOOM = 0.68
-const FIT_MARGIN = 48
+const FIT_MARGIN = 48 + 16
+const FIT_DEADBAND = 0.01
 function useFitZoom(ref: React.RefObject<HTMLDivElement | null>, enabled: boolean) {
   const [zoom, setZoom] = useState(1)
   useEffect(() => {
@@ -28,7 +34,7 @@ function useFitZoom(ref: React.RefObject<HTMLDivElement | null>, enabled: boolea
       const natural = el.getBoundingClientRect().height / current
       const next = Math.max(MIN_ZOOM, Math.min(1, (window.innerHeight - FIT_MARGIN) / natural))
       const rounded = Math.round(next * 1000) / 1000
-      if (rounded !== current) {
+      if (Math.abs(rounded - current) >= FIT_DEADBAND) {
         current = rounded
         setZoom(rounded)
       }
@@ -92,40 +98,17 @@ export function Device() {
     if (state.power === 'off') setView3d(false)
   }, [state.power])
 
-  // Tilt toward the pointer. Written straight to CSS variables, no re-render.
-  useEffect(() => {
-    const el = tiltRef.current
-    if (!el || handheld || reducedMotion || view3d) return
-    let raf = 0
-    const onMove = (e: PointerEvent) => {
-      if (raf) return
-      raf = requestAnimationFrame(() => {
-        raf = 0
-        const cx = window.innerWidth / 2
-        const cy = window.innerHeight / 2
-        el.style.setProperty('--ty', `${((e.clientX - cx) / cx) * 5}deg`)
-        el.style.setProperty('--tx', `${(-(e.clientY - cy) / cy) * 5}deg`)
-      })
-    }
-    const reset = () => {
-      el.style.setProperty('--tx', '0deg')
-      el.style.setProperty('--ty', '0deg')
-    }
-    window.addEventListener('pointermove', onMove)
-    document.addEventListener('pointerleave', reset)
-    return () => {
-      cancelAnimationFrame(raf)
-      window.removeEventListener('pointermove', onMove)
-      document.removeEventListener('pointerleave', reset)
-    }
-  }, [handheld, reducedMotion, view3d])
+  // The console no longer tilts toward the pointer: any rotation, however
+  // slight, makes the browser resample the LCD text and blur it. It only
+  // rotates in the 3D view, where you ask for it and drag it yourself.
 
   const flipStyle = { transform: `rotateY(${flipped ? 180 : 0}deg)` }
 
   if (handheld) {
     return (
       <div className="desk desk-lit min-h-dvh px-3 pb-6 pt-4">
-        <div className="desk-mat mx-auto flex max-w-[560px] flex-col items-center gap-6 px-3 pb-6 pt-3">
+        {/* gap-8: the manual's tab hangs 28px under the console */}
+        <div className="desk-mat mx-auto flex max-w-[560px] flex-col items-center gap-8 px-3 pb-6 pt-3">
           <div className="relative z-10" style={{ zoom: phoneZoom, paddingTop: 80 }}>
             <div className="desk-shadow" aria-hidden="true" />
             <div style={{ perspective: 1200 }}>
@@ -144,10 +127,8 @@ export function Device() {
             <Shelf />
             <GameCases />
           </div>
-          <Link to="/plain" className="focus-ring font-mono text-[12px] underline decoration-2 underline-offset-2">
-            Just show me the work →
-          </Link>
         </div>
+        <ReturnTicket />
         <Manual handheld />
         <div className="sr-only-live" role="status" aria-live="polite">
           {announcement}
@@ -158,9 +139,7 @@ export function Device() {
 
   return (
     <div className="desk desk-lit relative min-h-dvh">
-      <Link to="/plain" className="focus-ring absolute left-5 top-4 z-30 font-mono text-xs underline decoration-2 underline-offset-2">
-        Just show me the work →
-      </Link>
+      <ReturnTicket />
 
       <div className="flex min-h-dvh items-center justify-center px-6 py-6">
         <div ref={matRef} className="desk-mat relative flex items-start gap-14 pb-10 pl-12 pr-12 pt-12 xl:pr-28" style={{ zoom }}>
@@ -175,8 +154,8 @@ export function Device() {
           <div className="desk-shadow" aria-hidden="true" />
           <div ref={tiltRef} style={{ perspective: 1400 }}>
             <div
-              className={`device-3d ${view3d ? '' : 'transition-transform duration-150 ease-out'}`}
-              style={{ transform: 'rotateX(var(--tx, 0deg)) rotateY(var(--ty, 0deg))' }}
+              className="device-3d"
+              style={{ transform: view3d ? 'rotateX(var(--tx, 0deg)) rotateY(var(--ty, 0deg))' : undefined }}
             >
               <div className={`device-3d ${jolt ? 'jolt' : ''}`}>
                 <div ref={faceRef} className="device-3d relative transition-transform duration-700" style={flipStyle}>
@@ -196,20 +175,27 @@ export function Device() {
             </div>
           </div>
           <QuickStartCard>
-            {state.power === 'on' && (
-              <button
-                type="button"
-                role="switch"
-                aria-checked={view3d}
-                onClick={() => setView3d((v) => !v)}
-                className="focus-ring flex items-center gap-2 border-2 border-ink bg-paper px-2 py-1 font-mono text-[11px] shadow-hard-sm active:translate-y-[2px] active:shadow-none"
-              >
-                <span className="relative h-[12px] w-[22px] rounded-sm border-2 border-ink bg-[#3a3a3a]">
-                  <span className="absolute top-0 h-full w-[8px] border-r-2 border-ink transition-[left] duration-100" style={{ left: view3d ? 9 : 0, background: view3d ? 'var(--color-leaf)' : '#8a8a8a' }} />
-                </span>
-                3D view{view3d ? ': drag to rotate · 0 resets' : ''}
-              </button>
-            )}
+            {/* this row is the same height whether the toggle or the hint is in
+                it: if it grew on power-on the mat would grow and the whole
+                desk would rescale */}
+            <div className="flex h-[32px] items-center">
+              {state.power === 'on' ? (
+                <button
+                  type="button"
+                  role="switch"
+                  aria-checked={view3d}
+                  onClick={() => setView3d((v) => !v)}
+                  className="focus-ring flex items-center gap-2 border-2 border-ink bg-paper px-2 py-1 font-mono text-[11px] shadow-hard-sm active:translate-y-[2px] active:shadow-none"
+                >
+                  <span className="relative h-[12px] w-[22px] rounded-sm border-2 border-ink bg-[#3a3a3a]">
+                    <span className="absolute top-0 h-full w-[8px] border-r-2 border-ink transition-[left] duration-100" style={{ left: view3d ? 9 : 0, background: view3d ? 'var(--color-leaf)' : '#8a8a8a' }} />
+                  </span>
+                  3D view{view3d ? ': drag to rotate · 0 resets' : ''}
+                </button>
+              ) : (
+                <span className="font-mono text-[10px] text-ink/45">3D view · after power-on</span>
+              )}
+            </div>
           </QuickStartCard>
           <Manual handheld={false} />
         </div>

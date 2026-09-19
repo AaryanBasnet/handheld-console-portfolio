@@ -10,6 +10,9 @@
 @import "@fontsource/ibm-plex-sans/latin-600.css";
 @import "@fontsource/ibm-plex-mono/latin-400.css";
 @import "@fontsource/ibm-plex-mono/latin-500.css";
+/* Nepali (Devanagari). None of the fonts above have these glyphs. The file is
+   only downloaded once Devanagari text is actually on screen (unicode-range). */
+@import "@fontsource/noto-sans-devanagari/devanagari-500.css";
 
 @theme {
   --color-butter: #ffe45e;
@@ -21,10 +24,10 @@
   --color-leaf: #34c77b;
 
   --font-display: "Bagel Fat One", "Arial Black", sans-serif;
-  --font-pixel: "Pixelify Sans", "Nirmala UI", "Noto Sans Devanagari", "Devanagari Sangam MN", monospace;
-  --font-tiny: "Silkscreen", monospace;
-  --font-sans: "IBM Plex Sans", system-ui, sans-serif;
-  --font-mono: "IBM Plex Mono", ui-monospace, monospace;
+  --font-pixel: "Pixelify Sans", "Noto Sans Devanagari", "Nirmala UI", "Devanagari Sangam MN", monospace;
+  --font-tiny: "Silkscreen", "Noto Sans Devanagari", "Nirmala UI", monospace;
+  --font-sans: "IBM Plex Sans", "Noto Sans Devanagari", system-ui, sans-serif;
+  --font-mono: "IBM Plex Mono", "Noto Sans Devanagari", ui-monospace, monospace;
 
   --shadow-hard: 6px 6px 0 0 #111111;
   --shadow-hard-sm: 3px 3px 0 0 #111111;
@@ -116,6 +119,25 @@ body {
   transform-origin: 50% 20%;
   animation: flap-in 200ms ease-out both;
 }
+/* Nepali flips in a whole word at a time: a Devanagari letter can't be shaped on
+   its own (vowel signs and the virama attach to the consonant before them), so a
+   word is the smallest piece that stays intact. No seam line either: it would
+   cut through the letters' headline. */
+.flap-word {
+  display: inline-block;
+  white-space: nowrap;
+  padding: 0 0.1em;
+  background: color-mix(in srgb, var(--lcd-bg) 84%, #000);
+  border-radius: 1px;
+  transform-origin: 50% 20%;
+  animation: flap-in 200ms ease-out both;
+}
+/* Devanagari is drawn taller and needs more line height than the pixel font */
+.lcd .ne-text {
+  font-size: 4.2cqw;
+  line-height: 1.45;
+  letter-spacing: 0;
+}
 .flap-char::after {
   content: '';
   position: absolute;
@@ -186,6 +208,18 @@ body {
   transform: rotate(-22deg) translateY(3px);
   box-shadow: 0 1px 0 0 var(--color-ink);
 }
+/* "Press Select" nudge: the prompt on the LCD, the SELECT pill and the booklet
+   tab all pulse on the same 1.1s beat so they read as one message */
+@keyframes nudge-pulse { 0%, 100% { opacity: 1 } 50% { opacity: 0.3 } }
+.nudge-pulse { animation: nudge-pulse 1.1s ease-in-out infinite; }
+@keyframes pill-nudge {
+  0%, 100% { background-color: #4a4a4a; box-shadow: 0 4px 0 0 var(--color-ink), 0 0 0 0 rgba(45, 59, 255, 0.6); }
+  50%      { background-color: var(--color-cobalt); box-shadow: 0 4px 0 0 var(--color-ink), 0 0 0 8px rgba(45, 59, 255, 0); }
+}
+.pill-nudge { animation: pill-nudge 1.1s ease-in-out infinite; }
+@keyframes tab-nudge { 0%, 100% { transform: translateY(0) } 50% { transform: translateY(4px) } }
+.tab-nudge { animation: tab-nudge 1.1s ease-in-out infinite; }
+
 .btn-hw:focus-visible, .focus-ring:focus-visible {
   outline: 3px solid var(--color-cobalt);
   outline-offset: 3px;

@@ -19,7 +19,7 @@ interface Props {
  * the hint mentions that automatically instead of every screen restating it.
  */
 export function ScreenFrame({ title, right, hint, children, scroll = true, className = '', noManualHint = false }: Props) {
-  const { scrollRef, state } = useDevice()
+  const { scrollRef, state, nudge } = useDevice()
   const showManualHint = !noManualHint && !!state.cart.inserted && !state.manualOpen
   const fullHint = hint && showManualHint ? (
     <>
@@ -45,10 +45,18 @@ export function ScreenFrame({ title, right, hint, children, scroll = true, class
       >
         {children}
       </div>
-      {fullHint && (
-        <div className="t-xs px-[4cqw] pb-[2.5cqw] pt-[1cqw] uppercase opacity-80" style={{ borderTop: '2px dotted var(--lcd-mid)' }}>
-          {fullHint}
+      {nudge ? (
+        // idle on a cartridge, manual never opened: point at SELECT, which is
+        // pulsing on the console at the same time
+        <div className="nudge-pulse t-xs px-[4cqw] pb-[2.5cqw] pt-[1cqw] font-bold uppercase" style={{ borderTop: '2px solid var(--lcd-fg)' }}>
+          ▶ Press Select · Manual inside
         </div>
+      ) : (
+        fullHint && (
+          <div className="t-xs px-[4cqw] pb-[2.5cqw] pt-[1cqw] uppercase opacity-80" style={{ borderTop: '2px dotted var(--lcd-mid)' }}>
+            {fullHint}
+          </div>
+        )
       )}
     </div>
   )

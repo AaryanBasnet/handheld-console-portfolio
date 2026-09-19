@@ -21,7 +21,7 @@ function LED({ on }: { on: boolean }) {
 function Toast() {
   const { state } = useDevice()
   return (
-    <div role="status" aria-live="polite" className="min-h-[12px] max-w-[60%] truncate text-right font-tiny text-[9px] uppercase text-butter">
+    <div role="status" aria-live="polite" className="min-w-0 flex-1 truncate whitespace-nowrap text-right font-tiny text-[9px] uppercase text-butter">
       {state.toast && (
         <span key={state.toast.key} className="inline-block" style={{ animation: 'toast-in 160ms steps(3) both' }}>
           {state.toast.text}
@@ -103,13 +103,46 @@ function LinkPort({ className = '' }: { className?: string }) {
 }
 
 function Brand({ size = 22 }: { size?: number }) {
+  const { state } = useDevice()
   return (
-    <div className="flex items-baseline gap-2">
+    <div className="flex shrink-0 items-baseline gap-2">
       <span className="font-display leading-none" style={{ color: 'var(--shell)', fontSize: size }}>
         {colophon.deviceName}
       </span>
-      <span className="font-tiny text-[7px] uppercase text-paper/60">Portfolio system</span>
+      {/* the tagline steps aside while a toast is showing, so the toast has room
+          and this row never wraps (a wrap made the whole console taller) */}
+      <span className={`whitespace-nowrap font-tiny text-[7px] uppercase text-paper/60 ${state.toast ? 'hidden' : ''}`}>Portfolio system</span>
     </div>
+  )
+}
+
+/**
+ * The loaded cartridge's manual, tucked under the console with its tab
+ * showing, right under the SELECT button. The cover uses the cartridge's
+ * label colours. It's absolutely positioned (it must never change the
+ * console's height) and it is a real button: tapping it opens the manual,
+ * same as Select. It bobs in step with the SELECT pill during the nudge.
+ */
+function ManualTab() {
+  const { state, openManual, nudge } = useDevice()
+  const cart = cartById(state.cart.inserted ?? undefined)
+  if (!cart) return null
+  return (
+    <button
+      type="button"
+      onClick={() => openManual(true)}
+      aria-label={`Open the ${cart.title} manual (Select)`}
+      className={`focus-ring absolute left-[84px] top-full z-0 -mt-[6px] h-[34px] w-[116px] rounded-b-md border-x-[3px] border-b-[3px] border-ink ${nudge ? 'tab-nudge' : ''}`}
+      style={{ background: cart.label.bg, color: cart.label.fg }}
+    >
+      <span className="absolute inset-x-0 bottom-0 flex h-[16px] items-center justify-center gap-1 font-tiny text-[7px] uppercase leading-none">
+        Manual
+        <svg viewBox="0 0 8 8" width="7" height="7" aria-hidden="true">
+          <path d="M4 0 L8 5 H5 V8 H3 V5 H0 Z" fill="currentColor" />
+        </svg>
+        Select
+      </span>
+    </button>
   )
 }
 
@@ -142,7 +175,8 @@ export function Front() {
           </div>
           <span className="absolute right-4 top-[5px] font-tiny text-[7px] uppercase text-paper/50">Color LCD</span>
           <Screen />
-          <div className="mt-2 flex items-end justify-between px-1">
+          {/* fixed height: nothing that appears in this row may change the console's size */}
+          <div className="mt-2 flex h-[24px] items-end justify-between gap-2 px-1">
             <Brand />
             <Toast />
           </div>
@@ -158,6 +192,7 @@ export function Front() {
         <Speaker className="absolute bottom-[58px] right-[34px]" />
       </div>
 
+      <ManualTab />
       <ContrastWheel className="absolute -left-[12px] top-[118px] z-20" />
       <VolumeWheel className="absolute -right-[12px] top-[118px] z-20" />
       <LinkPort className="absolute -right-[9px] top-[420px] z-20" />

@@ -11,6 +11,14 @@ export const profile = {
   affiliation: 'affiliated with Coventry University',
   areas: ['Full-stack development', 'AI/ML systems', 'Cybersecurity', 'Game dev'],
   saveSlot: 'SAVE 01',
+  /** The save-file screen is small: short forms of the facts above, one line each. */
+  save: {
+    class: ['BSc (Hons) Computing', 'First Class'],
+    guild: 'Softwarica · Coventry Univ.',
+    abilities: ['Full-stack · AI/ML', 'Security · Game dev'],
+    /** A flavour line, not a claim. Change it to "Open to opportunities" only if that is true. */
+    status: 'Building new things',
+  },
   otherPortfolio: { label: 'Editorial portfolio', url: 'https://aaryanbasnet.com.np/' },
 }
 
@@ -40,6 +48,7 @@ export const colophon = {
     { role: 'Screen', value: 'Pixelify Sans' },
     { role: 'Labels', value: 'Silkscreen' },
     { role: 'Manuals', value: 'IBM Plex Sans / IBM Plex Mono' },
+    { role: 'Nepali', value: 'Noto Sans Devanagari' },
     { role: 'Served via', value: 'Fontsource, self-hosted' },
   ],
   credits: [

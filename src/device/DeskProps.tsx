@@ -3,6 +3,7 @@ import { useDevice } from './DeviceProvider'
 import { achievements } from '../content/achievements'
 import { CartArt } from './Cartridge'
 import { KeyLegend } from './KeyLegend'
+import { cartTally } from '../lib/tally'
 
 /** Sticky note on the desk: the last achievement earned. */
 export function StickyNote({ className = '' }: { className?: string }) {
@@ -83,7 +84,8 @@ export function Pencil({ className = '' }: { className?: string }) {
 /** Printed quick-start card: the key legend, plus any extra controls. */
 export function QuickStartCard({ children }: { children?: ReactNode }) {
   return (
-    <div className="mt-6 border-[3px] border-ink bg-paper px-4 py-3 shadow-hard-sm" aria-label="Quick start card">
+    // mt-9, not mt-6: the manual's tab hangs 28px under the console
+    <div className="mt-9 border-[3px] border-ink bg-paper px-4 py-3 shadow-hard-sm" aria-label="Quick start card">
       <div className="flex items-baseline justify-between gap-2">
         <span className="font-display text-sm">Quick start</span>
         <span className="font-tiny text-[7px] uppercase text-ink/60">Keyboard · a gamepad works too</span>
@@ -98,13 +100,15 @@ export function QuickStartCard({ children }: { children?: ReactNode }) {
 export function GameCases() {
   const { bootedCarts, available } = useDevice()
   const listed = available.filter((c) => c.bin !== 'hidden')
-  const played = listed.filter((c) => bootedCarts.includes(c.id)).length
+  const { played, total } = cartTally(available, bootedCarts)
+  const shelfCount = available.filter((c) => c.bin === 'shelf').length
   return (
     <div className="border-[3px] border-ink bg-paper p-4 shadow-hard">
       <div className="mb-2 flex items-baseline justify-between">
         <h2 className="font-display text-lg">Game cases</h2>
+        {/* same words and same count as CARTS on the save file */}
         <span className="font-tiny text-[8px] uppercase text-ink/70">
-          {played}/{listed.length} played
+          Carts {played}/{total} booted
         </span>
       </div>
       <ul className="flex gap-2" aria-label="Game cases">
@@ -132,7 +136,7 @@ export function GameCases() {
           )
         })}
       </ul>
-      <p className="mt-2 font-tiny text-[7px] uppercase text-ink/60">Boot every shelf cartridge for the Collector trophy.</p>
+      <p className="mt-2 font-tiny text-[7px] uppercase text-ink/60">Boot the {shelfCount} shelf carts for the Collector trophy.</p>
     </div>
   )
 }

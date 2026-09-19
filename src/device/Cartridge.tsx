@@ -103,7 +103,8 @@ export function Cartridge({ cart, width = 150, className = '', style, sticker }:
           <CartArt id={cart.id} accent={cart.label.accent} fg={cart.label.fg} />
         </div>
         <div className="absolute" style={{ left: '36%', right: '4%', top: '12%' }}>
-          <div className="font-pixel font-bold uppercase leading-none tracking-tight" style={{ fontSize: width * 0.088 }}>
+          {/* titles longer than 9 letters (CrowdShield) shrink to stay on the label */}
+          <div className="font-pixel font-bold uppercase leading-none tracking-tight" style={{ fontSize: width * 0.088 * Math.min(1, 9 / cart.title.length) }}>
             {cart.title}
           </div>
           <div className="leading-tight opacity-90" style={{ fontSize: width * 0.052, marginTop: width * 0.03 }}>

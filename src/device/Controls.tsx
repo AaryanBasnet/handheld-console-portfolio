@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import { HwButton } from './HwButton'
+import { useDevice } from './DeviceProvider'
 
 /** Sizes scale from one number so desk and handheld layouts share the parts. */
 export function DPad({ size = 112 }: { size?: number }) {
@@ -81,6 +82,7 @@ export function ABButtons({ size = 54 }: { size?: number }) {
 }
 
 export function StartSelect({ width = 48 }: { width?: number }) {
+  const { nudge } = useDevice()
   return (
     <div className="flex items-end gap-4" role="group" aria-label="Select and Start">
       {(['select', 'start'] as const).map((b) => (
@@ -91,7 +93,10 @@ export function StartSelect({ width = 48 }: { width?: number }) {
             className="rounded-full"
             style={{ border: 0, boxShadow: 'none', background: 'transparent', transform: 'none', padding: '8px 6px' }}
           >
-            <span className="pill block -rotate-[22deg] rounded-full border-[3px] border-ink bg-[#4a4a4a]" style={{ width, height: width * 0.32 }} />
+            <span
+              className={`pill block -rotate-[22deg] rounded-full border-[3px] border-ink bg-[#4a4a4a] ${b === 'select' && nudge ? 'pill-nudge' : ''}`}
+              style={{ width, height: width * 0.32 }}
+            />
           </HwButton>
           <div className="mt-3 font-tiny text-[10px] uppercase text-ink">{b}</div>
         </div>

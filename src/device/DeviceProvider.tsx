@@ -49,7 +49,17 @@ export interface DeviceApi {
   /** mouse/touch shortcut: choose a menu row directly */
   activateMenu: (index: number) => void
   activateCartList: (index: number) => void
+  /**
+   * True while a cartridge sits idle and the manual has never been opened:
+   * the screen shows a "press Select" prompt and the SELECT button pulses.
+   */
+  nudge: boolean
+  /** raise the nudge now (a demo that has looped once), if it is allowed */
+  nudgeNow: () => void
 }
+
+/** Idle time on a cartridge screen before the manual prompt appears. */
+const NUDGE_MS = 6000
 
 const DeviceContext = createContext<DeviceApi | null>(null)
 
@@ -166,6 +176,41 @@ export function DeviceProvider({ children }: { children: ReactNode }) {
   const navigateTo = useCallback((to: string) => navRef.current(to), [])
 
   const announce = useCallback((text: string) => setAnnouncement(text), [])
+
+  /* ---------- the "press Select" nudge ---------- */
+  // Only while a booted cartridge is on screen with the manual closed, and
+  // only until the visitor has opened a manual once: after that they know.
+  const [nudge, setNudge] = useState(false)
+  const nudgeTimer = useRef<number | null>(null)
+  const nudgeAllowed = useCallback(() => {
+    const s = stateRef.current
+    return s.power === 'on' && s.page.kind === 'cart' && s.cart.booted === s.page.id && !s.manualOpen && !unlockedRef.current.includes('manual')
+  }, [])
+  /** any input: hide the prompt, and start counting idle time again */
+  const armNudge = useCallback(() => {
+    if (nudgeTimer.current) window.clearTimeout(nudgeTimer.current)
+    setNudge(false)
+    if (!nudgeAllowed()) return
+    nudgeTimer.current = window.setTimeout(() => {
+      if (nudgeAllowed()) setNudge(true)
+    }, NUDGE_MS)
+  }, [nudgeAllowed])
+  const nudgeNow = useCallback(() => {
+    if (nudgeAllowed()) setNudge(true)
+  }, [nudgeAllowed])
+
+  // re-arm when the situation changes (cartridge booted, page left, manual closed)
+  useEffect(() => {
+    armNudge()
+    return () => {
+      if (nudgeTimer.current) window.clearTimeout(nudgeTimer.current)
+    }
+  }, [state.power, state.page, state.cart.booted, state.manualOpen, armNudge])
+  // taps and clicks on the LCD (Ripe's plots, menu rows) are input too
+  useEffect(() => {
+    window.addEventListener('pointerdown', armNudge)
+    return () => window.removeEventListener('pointerdown', armNudge)
+  }, [armNudge])
 
   const available = useMemo(
     () => cartridges.filter((c) => c.bin !== 'hidden' || state.secretUnlocked),
@@ -358,6 +403,7 @@ export function DeviceProvider({ children }: { children: ReactNode }) {
     (b: Button) => {
       unlockAudio()
       vibrate(6)
+      armNudge()
       const s = stateRef.current
       anyListeners.current.forEach((fn) => fn(b))
 
@@ -506,7 +552,7 @@ export function DeviceProvider({ children }: { children: ReactNode }) {
         }
       }
     },
-    [playCart, openManual, toast, unlock, runMenuItem],
+    [playCart, openManual, toast, unlock, runMenuItem, armNudge],
   )
 
   const onEscape = useCallback(() => {
@@ -551,6 +597,8 @@ export function DeviceProvider({ children }: { children: ReactNode }) {
     navigateTo,
     announce,
     announcement,
+    nudge,
+    nudgeNow,
     scrollRef,
     manualScrollRef,
     activateMenu,

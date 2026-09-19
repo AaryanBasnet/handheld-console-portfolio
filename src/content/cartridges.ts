@@ -44,6 +44,8 @@ export interface Cartridge {
   summary: string
   /** one-line hint for the controls on the cart's screen */
   controls: string
+  /** second line of the boot-screen tip: what this cartridge's manual holds */
+  tip: string
   manual: ManualSection[]
   links: { label: string; href: string }[]
 }
@@ -61,11 +63,13 @@ export const cartridges: Cartridge[] = [
     stack: ['Python', 'LangGraph', 'ChromaDB', 'Ollama'],
     summary: 'Bilingual English/Nepali chatbot for Tribhuvan International Airport. Final-year thesis.',
     controls: 'A: answer / next · START: EN/NE',
+    tip: 'See how TIA chooses its tools.',
     manual: [
       {
         heading: 'What it is',
         body: [
-          'A virtual assistant for Tribhuvan International Airport in Kathmandu. It answers passenger questions in English and Nepali.',
+          'A virtual assistant for Tribhuvan International Airport in Kathmandu. It answers passenger questions in English or Nepali and reports flight status.',
+          'Airport information is scattered across FAQs and status sources, and many passengers want answers in Nepali. The assistant pulls it together with retrieval-augmented generation and a LangGraph ReAct agent, running local models.',
           'Built as the final-year thesis for a BSc (Hons) Computing degree.',
         ],
       },
@@ -92,6 +96,11 @@ export const cartridges: Cartridge[] = [
           'process_sim_card_kyc: SIM card KYC when the module is available. Validates the passport MRZ and runs face recognition.',
         ],
       },
+      {
+        heading: 'Role',
+        bullets: ['AI system design', 'RAG pipeline', 'Backend prototyping'],
+      },
+      { heading: 'Year', body: ['2026'] },
     ],
     links: [{ label: 'Repository', href: 'https://github.com/AaryanBasnet/TARA' }],
   },
@@ -99,7 +108,7 @@ export const cartridges: Cartridge[] = [
     id: 'crowdshield',
     title: 'CrowdShield',
     tag: 'Penetration test',
-    bin: 'shelf',
+    bin: 'bargain',
     status: 'Report',
     label: { bg: '#ff4a2b', fg: '#111111', accent: '#fffdf5' },
     palette: { name: 'Dungeon', bg: '#2a1f2e', fg: '#ffd9a8', mid: '#7a4b5c', accent: '#ff4a2b' },
@@ -107,6 +116,7 @@ export const cartridges: Cartridge[] = [
     stack: ['PTES', 'CVSS', 'Formal report'],
     summary: 'Academic penetration test of a bug bounty platform. 9 findings, 5 critical, formal report.',
     controls: 'D-PAD: move · A: enter/answer · START: report',
+    tip: 'Read what the pen test found.',
     manual: [
       {
         heading: 'What it is',
@@ -150,13 +160,17 @@ export const cartridges: Cartridge[] = [
     label: { bg: '#111111', fg: '#ffe45e', accent: '#ff9ecf' },
     palette: { name: 'Deco', bg: '#1c1f26', fg: '#ffe45e', mid: '#6b6a5a', accent: '#ff9ecf' },
     jingle: [64, 68, 71, 76],
-    stack: ['React', 'Tailwind', 'Redux'],
-    summary: 'Venue booking platform. Advanced filters, multi-step booking, owner dashboard.',
+    stack: ['React', 'Flutter', 'Node.js', 'Express', 'MongoDB', 'Socket.io', 'Stripe', 'Playwright', 'Tailwind', 'Redux'],
+    summary: 'Marketplace for booking banquet and wedding venues by date and time slot. Customer, venue-owner and admin roles. Web and mobile.',
     controls: 'D-PAD: walk · A: open · START: owner desk',
+    tip: 'See its features and stack.',
     manual: [
       {
         heading: 'What it is',
-        body: ['A platform for finding and booking venues. Two sides: people who book, and owners who list and manage venues.'],
+        body: [
+          'A marketplace for booking banquet and wedding venues by date and time slot, with separate customer, venue-owner and admin roles. A React web app, a Flutter mobile app and a Node/Express backend.',
+          'Customers need to compare venues and book a slot quickly, and owners need one place to manage listings and requests. Venure handles both.',
+        ],
       },
       {
         heading: 'Features',
@@ -164,12 +178,21 @@ export const cartridges: Cartridge[] = [
           'Advanced filters for browsing venues.',
           'Multi-step booking flow.',
           'Owner dashboard.',
+          'Role-based access, enforced on the API and in both apps.',
+          'Live chat between clients and owners over Socket.io.',
+          'Stripe payments. On mobile, a biometric check gates every payment.',
         ],
       },
-      { heading: 'Stack', bullets: ['React', 'Tailwind CSS', 'Redux'] },
+      {
+        heading: 'Testing',
+        body: ['11 Playwright end-to-end tests cover auth, favorites, Stripe booking, owner venue management with image upload, and admin approval.'],
+      },
+      { heading: 'Role', bullets: ['Full-stack: backend, React web app, Flutter app'] },
+      { heading: 'Year', body: ['2025'] },
     ],
     links: [
       { label: 'Live', href: 'https://venure-frontend.vercel.app/' },
+      { label: 'Frontend repository', href: 'https://github.com/AaryanBasnet/venure-frontend' },
     ],
   },
   {
@@ -184,6 +207,7 @@ export const cartridges: Cartridge[] = [
     stack: ['Godot 4', 'GDScript'],
     summary: 'Solo tomato farming simulator. In development. Not finished.',
     controls: 'LEFT/RIGHT: plot · A: act · START: shop',
+    tip: "See what's built so far.",
     manual: [
       {
         heading: 'Status: not finished',
@@ -209,18 +233,32 @@ export const cartridges: Cartridge[] = [
     label: { bg: '#111111', fg: '#e8d8a8', accent: '#ffe45e' },
     palette: { name: 'Brass', bg: '#111111', fg: '#e8d8a8', mid: '#6a5a3a', accent: '#ffe45e' },
     jingle: [60, 67],
-    stack: ['MongoDB', 'Express', 'React', 'Node'],
-    summary: 'Luxury watch e-commerce site on the MERN stack.',
+    stack: ['MongoDB', 'Express', 'React', 'Node', 'Stripe', 'Cloudinary'],
+    summary: 'Luxury watch store on the MERN stack, with an admin dashboard and a security-focused login system.',
     controls: 'LEFT/RIGHT: model · A: add · START: checkout',
+    tip: 'See what the store covers.',
     manual: [
       {
         heading: 'What it is',
-        body: ['An e-commerce site for luxury watches, built on MongoDB, Express, React and Node.'],
+        body: [
+          'A store for luxury watches, built on MongoDB, Express, React and Node. Shoppers get carts, wishlists and order tracking. Admins get a dashboard for inventory and analytics.',
+        ],
       },
       {
         heading: 'Features',
-        bullets: ['Product browsing', 'Cart', 'Checkout', 'Order tracking', 'Admin dashboard'],
+        bullets: ['Product browsing', 'Cart and wishlist', 'Checkout', 'Order tracking', 'Admin dashboard for inventory and analytics'],
       },
+      {
+        heading: 'Security',
+        bullets: [
+          'Login uses JWTs in HTTP-only cookies with session versioning, so logging out or changing a password ends every active session.',
+          'TOTP multi-factor auth with backup codes.',
+          'An audit log of admin actions, logins and failed attempts.',
+          'Helmet headers, rate limiting and Zod validation on requests.',
+        ],
+      },
+      { heading: 'Role', bullets: ['Full-stack development', 'Product UI', 'Admin workflows'] },
+      { heading: 'Year', body: ['2025'] },
     ],
     links: [],
   },
@@ -228,14 +266,15 @@ export const cartridges: Cartridge[] = [
     id: 'sweetnest',
     title: 'SweetNest',
     tag: 'Custom cakes',
-    bin: 'bargain',
+    bin: 'shelf',
     status: 'Released',
     label: { bg: '#ff9ecf', fg: '#111111', accent: '#34c77b' },
     palette: { name: 'Icing', bg: '#ffe3ef', fg: '#5a1f3a', mid: '#ff9ecf', accent: '#34c77b' },
     jingle: [72, 76],
-    stack: ['React', 'Three.js', 'Zustand', 'Express', 'MongoDB'],
+    stack: ['React', 'Three.js', 'Zustand', 'React Query', 'Express', 'MongoDB'],
     summary: 'Custom cake platform. Interactive 3D cake customization, eSewa payments, loyalty rewards, order tracking.',
     controls: 'UP/DOWN: option · LEFT/RIGHT: change · A: bake',
+    tip: 'See the features and my role.',
     manual: [
       {
         heading: 'What it is',
@@ -246,7 +285,17 @@ export const cartridges: Cartridge[] = [
       },
       {
         heading: 'Features',
-        bullets: ['Interactive 3D cake customization', 'eSewa payment integration', 'Loyalty rewards', 'Order tracking', 'Secure Node.js / MongoDB backend'],
+        bullets: [
+          'Interactive 3D cake customization: size, toppers, colours and custom text, with a 3D preview and live price updates',
+          'eSewa payment integration, with server-side verification at checkout',
+          'Loyalty rewards, with loyalty points and coupon validation endpoints',
+          'Order tracking',
+          'Secure Node.js / MongoDB backend',
+        ],
+      },
+      {
+        heading: 'How it is built',
+        bullets: ['UI state lives in Zustand and server data in React Query, which keeps the customizer responsive.'],
       },
       {
         heading: 'Role',
@@ -271,6 +320,7 @@ export const cartridges: Cartridge[] = [
     stack: ['KHEL·1'],
     summary: 'Hidden system cartridge. Sound test, palette test, input monitor.',
     controls: 'UP/DOWN: page · A: run',
+    tip: 'See what the dev kit does.',
     manual: [
       {
         heading: 'Unlocked',
